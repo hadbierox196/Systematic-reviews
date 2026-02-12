@@ -3,681 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Systematic Review Manager</title>
+    <title>SRM | Systematic Review Manager</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        /* --- DESIGN SYSTEM --- */
         :root {
             --bg: #ffffff;
             --text: #000000;
             --border: #000000;
-            --border-width: 2px;
-            --spacing: 1.5rem;
+            --gray: #f4f4f4;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
         
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding-bottom: 100px;
-        }
+        h1, h2, h3, h4 { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
 
-        h1, h2, h3, h4 {
-            font-family: 'Barlow Condensed', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-
-        /* --- UTILITIES --- */
+        /* --- UI COMPONENTS --- */
         .btn {
-            background: var(--text);
-            color: var(--bg);
-            border: none;
-            padding: 8px 16px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 600;
-            text-transform: uppercase;
-            cursor: pointer;
-            font-size: 0.9rem;
+            background: black; color: white; border: none; padding: 12px 20px;
+            font-family: 'Barlow Condensed'; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; transition: var(--transition);
         }
-        .btn:hover { opacity: 0.8; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-outline { background: transparent; color: black; border: 2px solid black; }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--text);
-            border: 1px solid var(--text);
+        input, textarea {
+            width: 100%; padding: 12px; border: 2px solid black;
+            font-family: 'Poppins'; outline: none;
         }
 
-        /* --- LAYOUT --- */
+        /* --- DASHBOARD --- */
+        #view-dashboard { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .project-card { 
+            border: 2px solid black; padding: 20px; cursor: pointer; 
+            transition: var(--transition); position: relative;
+        }
+        .project-card:hover { background: var(--gray); }
+        .delete-proj { position: absolute; top: 10px; right: 10px; color: red; cursor: pointer; font-weight: bold; }
+
+        /* --- HEADER & HAMBURGER --- */
         .header {
-            position: sticky;
-            top: 0;
-            background: var(--bg);
-            border-bottom: var(--border-width) solid var(--border);
-            padding: var(--spacing);
-            z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 20px; border-bottom: 2px solid black; sticky: top; background: white; z-index: 1000;
         }
-
-        .layout-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        @media (min-width: 1024px) {
-            .layout-grid {
-                grid-template-columns: 280px 1fr;
-            }
-            .sidebar {
-                position: sticky;
-                top: 130px;
-                height: calc(100vh - 130px);
-                overflow-y: auto;
-                border-right: var(--border-width) solid var(--border);
-                padding: var(--spacing);
-                display: block !important;
-            }
-        }
+        .nav-toggle { font-size: 24px; cursor: pointer; display: block; }
         
-        .sidebar { display: none; } /* Hidden on mobile */
-        .main-content { padding: var(--spacing); }
-
-        /* --- COMPONENTS --- */
-        #project-title {
-            font-size: 2rem;
-            font-weight: 700;
-            font-family: 'Barlow Condensed', sans-serif;
-            border: none;
-            border-bottom: 2px dashed #ccc;
-            width: 100%;
-            outline: none;
-            color: var(--text);
-            margin-bottom: 1rem;
+        /* Side Menu */
+        .side-menu {
+            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
+            background: white; border-right: 2px solid black; z-index: 2000;
+            transition: var(--transition); padding: 20px; overflow-y: auto;
         }
+        .side-menu.open { left: 0; }
+        .menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1500; display: none;
+        }
+        .menu-overlay.show { display: block; }
+        
+        .nav-list { list-style: none; margin-top: 30px; }
+        .nav-list li { margin-bottom: 10px; }
+        .nav-list a { 
+            text-decoration: none; color: black; font-family: 'Barlow Condensed';
+            font-weight: 600; font-size: 1.2rem; display: block; padding: 5px;
+        }
+        .nav-list a:hover { background: var(--gray); }
+
+        /* --- PROJECT VIEW --- */
+        #view-project { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .section-card { border: 2px solid black; margin-bottom: 40px; scroll-margin-top: 100px; }
+        .section-header { background: black; color: white; padding: 15px; display: flex; justify-content: space-between; }
+        .section-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* Smart Editor */
+        .editor-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 900px) { .editor-container { grid-template-columns: 1fr 1fr; } }
+        .smart-input { min-height: 250px; font-size: 14px; }
+        .rendered-view { border: 1px solid #ddd; padding: 15px; background: white; min-height: 250px; overflow-x: auto; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; font-size: 0.9rem; }
+        th { background: #eee; }
 
         /* Progress Bar */
-        .progress-wrapper { display: flex; align-items: center; gap: 10px; }
-        .progress-container { flex-grow: 1; height: 10px; border: 2px solid black; }
-        .progress-fill { height: 100%; background: black; width: 0%; transition: width 0.3s; }
+        .progress-bar-container { height: 8px; background: #ddd; width: 100%; margin: 10px 0; }
+        .progress-fill { height: 100%; background: black; width: 0%; transition: width 0.5s; }
 
-        /* Navigation */
-        .nav-list { list-style: none; }
-        .nav-link {
-            text-decoration: none;
-            color: #666;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 600;
-            font-size: 1.1rem;
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-        }
-        .nav-link:hover { color: black; }
-        .status-dot { width: 8px; height: 8px; border: 1px solid black; border-radius: 50%; }
-        .status-dot.done { background: black; }
-
-        /* Section Card */
-        .section-card {
-            border: 2px solid black;
-            margin-bottom: 3rem;
-            scroll-margin-top: 180px; /* Offset for sticky header */
-        }
-        .section-header {
-            background: black;
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .section-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
-
-        /* Prompt Box */
-        .prompt-box {
-            background: #f4f4f4;
-            padding: 1rem;
-            border: 1px solid #ddd;
-        }
-        .prompt-text {
-            font-family: monospace;
-            font-size: 0.9rem;
-            white-space: pre-wrap;
-            margin-bottom: 10px;
-        }
-
-        /* Editor */
-        .editor-grid { display: grid; gap: 1rem; }
-        @media (min-width: 768px) { .editor-grid { grid-template-columns: 1fr 1fr; } }
-        
-        textarea.smart-input {
-            width: 100%;
-            min-height: 300px;
-            padding: 1rem;
-            border: 1px solid #ccc;
-            font-family: 'Poppins', sans-serif;
-            resize: vertical;
-        }
-        textarea.smart-input:focus { border-color: black; outline: 2px solid black; }
-        
-        .rendered-view {
-            width: 100%;
-            min-height: 300px;
-            padding: 1rem;
-            border: 1px solid #ccc;
-            background: #fff;
-            overflow-x: auto;
-        }
-        /* Rendered HTML Tables */
-        .rendered-view table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-        .rendered-view th, .rendered-view td { border: 1px solid #000; padding: 8px; text-align: left; }
-        .rendered-view th { background-color: #f0f0f0; }
-
-        /* Toast */
-        #toast {
-            position: fixed; bottom: 20px; right: 20px;
-            background: black; color: white; padding: 10px 20px;
-            font-family: 'Barlow Condensed', sans-serif;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
-        #toast.show { opacity: 1; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
+    <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
+    <nav class="side-menu" id="sideMenu">
+        <h2 onclick="goDashboard()" style="cursor:pointer">← Dashboard</h2>
+        <ul class="nav-list" id="navLinks">
+            </ul>
+    </nav>
+
     <header class="header">
-        <input type="text" id="project-title" placeholder="Untitled Systematic Review">
-        <div class="progress-wrapper">
-            <span style="font-family:'Barlow Condensed'; font-weight:700;">PROGRESS:</span>
-            <div class="progress-container"><div class="progress-fill" id="progress-bar"></div></div>
-            <span id="progress-text" style="font-family:'Barlow Condensed'; font-weight:700;">0%</span>
-        </div>
+        <div class="nav-toggle" id="hamburger" onclick="toggleMenu()">☰</div>
+        <h2 id="current-project-name">SYSTEMATIC REVIEW MANAGER</h2>
+        <button class="btn btn-outline" onclick="goDashboard()">ALL PROJECTS</button>
     </header>
 
-    <div class="layout-grid">
+    <div id="view-dashboard">
+        <h1>My Reviews</h1>
+        <p>Create and manage your systematic review projects.</p>
         
-        <aside class="sidebar">
-            <h3>Navigation</h3>
-            <hr style="border:0; border-top:2px solid black; margin:10px 0;">
-            <ul class="nav-list">
-                <li><a href="#sec-pico" class="nav-link">1. PICO <div class="status-dot" id="dot-pico"></div></a></li>
-                <li><a href="#sec-feasibility" class="nav-link">2. Feasibility <div class="status-dot" id="dot-feasibility"></div></a></li>
-                <li><a href="#sec-protocol" class="nav-link">3. PROTOCOL <div class="status-dot" id="dot-protocol"></div></a></li>
-                <li><a href="#sec-search" class="nav-link">4. Search <div class="status-dot" id="dot-search"></div></a></li>
-                <li><a href="#sec-screen-abs" class="nav-link">5. Screen (Abs) <div class="status-dot" id="dot-screen-abs"></div></a></li>
-                <li><a href="#sec-screen-full" class="nav-link">6. Screen (Full) <div class="status-dot" id="dot-screen-full"></div></a></li>
-                <li><a href="#sec-prisma" class="nav-link">7. PRISMA <div class="status-dot" id="dot-prisma"></div></a></li>
-                <li><a href="#sec-extraction" class="nav-link">8. Extraction <div class="status-dot" id="dot-extraction"></div></a></li>
-                <li><a href="#sec-missing" class="nav-link">9. Missing Data <div class="status-dot" id="dot-missing"></div></a></li>
-                <li><a href="#sec-abstract" class="nav-link">10. Abstract <div class="status-dot" id="dot-abstract"></div></a></li>
-                <li><a href="#sec-titlepage" class="nav-link">11. Title Page <div class="status-dot" id="dot-titlepage"></div></a></li>
-                <li><a href="#sec-intro" class="nav-link">12. Intro <div class="status-dot" id="dot-intro"></div></a></li>
-                <li><a href="#sec-methods" class="nav-link">13. Methods <div class="status-dot" id="dot-methods"></div></a></li>
-                <li><a href="#sec-results" class="nav-link">14. Results <div class="status-dot" id="dot-results"></div></a></li>
-                <li><a href="#sec-discussion" class="nav-link">15. Discussion <div class="status-dot" id="dot-discussion"></div></a></li>
-            </ul>
-        </aside>
+        <div style="border: 2px solid black; padding: 20px; margin-top: 20px;">
+            <h3>Start New Project</h3>
+            <input type="text" id="new-title" placeholder="Review Title..." style="margin: 10px 0;">
+            <textarea id="new-desc" placeholder="Brief description..." style="margin-bottom: 10px; height: 80px;"></textarea>
+            <button class="btn" onclick="createNewProject()">CREATE PROJECT</button>
+        </div>
 
-        <main class="main-content">
-
-            <section id="sec-pico" class="section-card" data-key="pico">
-                <div class="section-header"><h3>1. PICO Framework</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-pico">Define your Population, Intervention, Comparison, and Outcome. Be specific about inclusion criteria.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-pico')">Copy</button>
-                        </div>
-                    </div>
-                    <div>
-                        <strong>RESOURCE:</strong> <a href="https://linked-resource-here.com" target="_blank">Open PICO Tool</a>
-                    </div>
-                    <div class="editor-grid">
-                        <textarea id="input-pico" class="smart-input" placeholder="Type PICO details or paste JSON..."></textarea>
-                        <div id="render-pico" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-feasibility" class="section-card" data-key="feasibility">
-                <div class="section-header"><h3>2. Preliminary Feasibility Check</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-feasibility">Conduct a quick search on PubMed/Google Scholar. Are there enough studies? Are there too many? refine scope.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-feasibility')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Feasibility Checklist</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-feasibility" class="smart-input" placeholder="Notes on feasibility..."></textarea>
-                        <div id="render-feasibility" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-protocol" class="section-card" data-key="protocol">
-                <div class="section-header"><h3>3. PROTOCOL</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-protocol">Draft the PROSPERO protocol. Include rationale, objectives, and methodology.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-protocol')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="https://www.crd.york.ac.uk/prospero/" target="_blank">PROSPERO Registration</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-protocol" class="smart-input" placeholder="Draft protocol here..."></textarea>
-                        <div id="render-protocol" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-search" class="section-card" data-key="search">
-                <div class="section-header"><h3>4. Search Strategy</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-search">List your search strings (MeSH terms) for each database (PubMed, Embase, Cochrane).</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-search')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">PubMed Advanced Search</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-search" class="smart-input" placeholder="Paste search strings here..."></textarea>
-                        <div id="render-search" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-screen-abs" class="section-card" data-key="screen-abs">
-                <div class="section-header"><h3>5. Titles/Abstract Screening</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-screen-abs">Screen initial results. Paste list of included IDs or JSON data of decisions.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-screen-abs')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Screening Tool (Rayyan/Covidence)</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-screen-abs" class="smart-input" placeholder="Screening notes..."></textarea>
-                        <div id="render-screen-abs" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-screen-full" class="section-card" data-key="screen-full">
-                <div class="section-header"><h3>6. Full Text Screening</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-screen-full">Review full texts. Document reasons for exclusion (e.g., Wrong Outcome, Wrong Population).</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-screen-full')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Full Text Tool</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-screen-full" class="smart-input" placeholder="Exclusion reasons..."></textarea>
-                        <div id="render-screen-full" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-prisma" class="section-card" data-key="prisma">
-                <div class="section-header"><h3>7. PRISMA Flow Diagram</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-prisma">Fill out the PRISMA numbers: Identification, Screening, Eligibility, Included.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-prisma')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="http://prisma-statement.org/prismastatement/flowdiagram.aspx" target="_blank">PRISMA Template</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-prisma" class="smart-input" placeholder="Enter PRISMA counts..."></textarea>
-                        <div id="render-prisma" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-extraction" class="section-card" data-key="extraction">
-                <div class="section-header"><h3>8. Data Extraction</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-extraction">Extract data variables: Author, Year, Study Design, N, Age, Interventions, Outcomes. (Use JSON for auto-table!)</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-extraction')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Extraction Sheet</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-extraction" class="smart-input" placeholder='[{"Author":"Smith","Year":2020}, {"Author":"Doe","Year":2021}]'></textarea>
-                        <div id="render-extraction" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-missing" class="section-card" data-key="missing">
-                <div class="section-header"><h3>9. Missing Data</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-missing">Log attempts to contact authors for missing data or how missing data was handled (imputation).</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-missing')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Email Templates</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-missing" class="smart-input" placeholder="Missing data logs..."></textarea>
-                        <div id="render-missing" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-abstract" class="section-card" data-key="abstract">
-                <div class="section-header"><h3>10. Manuscript Abstract</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-abstract">Write the structured abstract: Background, Methods, Results, Conclusion. Strict word count.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-abstract')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Journal Guidelines</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-abstract" class="smart-input" placeholder="Draft abstract..."></textarea>
-                        <div id="render-abstract" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-titlepage" class="section-card" data-key="titlepage">
-                <div class="section-header"><h3>11. Title Page</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-titlepage">Full Title, Authors, Affiliations, Corresponding Author, Keywords, Conflicts of Interest.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-titlepage')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Title Page Format</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-titlepage" class="smart-input" placeholder="Title page info..."></textarea>
-                        <div id="render-titlepage" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-intro" class="section-card" data-key="intro">
-                <div class="section-header"><h3>12. Introduction</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-intro">What is known? What is the gap? What is the objective of this review?</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-intro')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Writing Guide</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-intro" class="smart-input" placeholder="Introduction text..."></textarea>
-                        <div id="render-intro" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-methods" class="section-card" data-key="methods">
-                <div class="section-header"><h3>13. Methods</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-methods">Describe Protocol registration, Search strategy, Selection criteria, Data extraction, Risk of bias assessment, Statistical analysis.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-methods')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Methods Checklist</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-methods" class="smart-input" placeholder="Methods text..."></textarea>
-                        <div id="render-methods" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-results" class="section-card" data-key="results">
-                <div class="section-header"><h3>14. Results</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-results">Study selection (PRISMA), Study characteristics, Risk of bias results, Synthesis of results (Meta-analysis or Narrative).</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-results')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Reporting Guidelines</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-results" class="smart-input" placeholder="Results text..."></textarea>
-                        <div id="render-results" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-            <section id="sec-discussion" class="section-card" data-key="discussion">
-                <div class="section-header"><h3>15. Discussion</h3></div>
-                <div class="section-body">
-                    <div>
-                        <h4>Prompt</h4>
-                        <div class="prompt-box">
-                            <div class="prompt-text" id="prompt-discussion">Summary of evidence, Limitations, Interpretation, Implications for practice/research, Conclusion.</div>
-                            <button class="btn btn-outline" onclick="copyText('prompt-discussion')">Copy</button>
-                        </div>
-                    </div>
-                    <div><strong>RESOURCE:</strong> <a href="#" target="_blank">Discussion Structure</a></div>
-                    <div class="editor-grid">
-                        <textarea id="input-discussion" class="smart-input" placeholder="Discussion text..."></textarea>
-                        <div id="render-discussion" class="rendered-view"></div>
-                    </div>
-                    <button class="btn" onclick="manualSave()">Save</button>
-                </div>
-            </section>
-
-        </main>
+        <div class="project-grid" id="projectGrid">
+            </div>
     </div>
 
-    <div id="toast">Saved!</div>
+    <div id="view-project">
+        <div id="project-meta">
+            <h1 id="display-title">Project Title</h1>
+            <p id="display-desc">Description goes here...</p>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="main-progress"></div>
+            </div>
+            <p style="font-size: 0.8rem; font-weight: bold;">TOTAL COMPLETION: <span id="progress-text">0%</span></p>
+        </div>
+        <hr style="margin: 30px 0; border: 1px solid black;">
+        
+        <div id="sections-container">
+            </div>
+    </div>
 
     <script>
-        // --- APP LOGIC ---
-        const APP_KEY = 'SysRevManager_Static_v1';
+        // --- DATA STRUCTURE ---
+        const SECTIONS_CONFIG = [
+            { id: "pico", title: "PICO", prompt: "Define Population, Intervention, Comparison, Outcome.", link: "https://example.com/pico" },
+            { id: "feasibility", title: "Preliminary Feasibility Check", prompt: "Initial search findings and study volume notes.", link: "#" },
+            { id: "protocol", title: "PROTOCOL", prompt: "Draft your PROSPERO or internal protocol.", link: "#" },
+            { id: "search", title: "Search", prompt: "Input search strings and databases used.", link: "#" },
+            { id: "abs-screen", title: "Titles/Abstract Screening", prompt: "Record inclusion/exclusion at abstract level.", link: "#" },
+            { id: "full-screen", title: "Full Text Screening", prompt: "Record reasons for full-text exclusion.", link: "#" },
+            { id: "prisma", title: "PRISMA", prompt: "Flowchart data counts.", link: "#" },
+            { id: "data-ext", title: "Data Extraction", prompt: "Use JSON format here for table rendering.", link: "#" },
+            { id: "missing", title: "Missing Data", prompt: "Contact logs for missing information.", link: "#" },
+            { id: "abstract", title: "Abstract", prompt: "Draft final manuscript abstract.", link: "#" },
+            { id: "title-page", title: "Title Page", prompt: "Author details and affiliations.", link: "#" },
+            { id: "intro", title: "Introduction", prompt: "Rationale and objectives.", link: "#" },
+            { id: "methods", title: "Methods", prompt: "Detailed methodology description.", link: "#" },
+            { id: "results", title: "Results", prompt: "Findings and statistical data.", link: "#" },
+            { id: "discussion", title: "Discussion", prompt: "Limitations and conclusions.", link: "#" }
+        ];
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAllData();
-            attachListeners();
-            calculateProgress();
-        });
+        let projects = JSON.parse(localStorage.getItem('SRM_PROJECTS')) || [];
+        let activeProjectId = null;
 
-        // 1. Data Handling
-        function loadAllData() {
-            // Load Title
-            const savedTitle = localStorage.getItem(APP_KEY + '_title');
-            if(savedTitle) document.getElementById('project-title').value = savedTitle;
+        // --- NAVIGATION ---
+        function toggleMenu() {
+            document.getElementById('sideMenu').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
 
-            // Load Section Data
-            const sections = document.querySelectorAll('.section-card');
-            sections.forEach(sec => {
-                const key = sec.getAttribute('data-key');
-                const savedContent = localStorage.getItem(APP_KEY + '_' + key);
-                
-                const input = sec.querySelector('.smart-input');
-                const display = sec.querySelector('.rendered-view');
-                
-                if (savedContent) {
-                    input.value = savedContent;
-                    display.innerHTML = parseContent(savedContent);
-                }
+        function goDashboard() {
+            activeProjectId = null;
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            document.getElementById('view-project').style.display = 'none';
+            document.getElementById('sideMenu').classList.remove('open');
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('hamburger').classList.add('hidden');
+            renderDashboard();
+        }
+
+        // --- DASHBOARD LOGIC ---
+        function createNewProject() {
+            const title = document.getElementById('new-title').value;
+            const desc = document.getElementById('new-desc').value;
+            if(!title) return alert("Please enter a title");
+
+            const newProj = {
+                id: Date.now(),
+                title: title,
+                desc: desc,
+                data: {} // Stores content for the 15 sections
+            };
+
+            projects.push(newProj);
+            save();
+            document.getElementById('new-title').value = '';
+            document.getElementById('new-desc').value = '';
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('projectGrid');
+            grid.innerHTML = '';
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.innerHTML = `
+                    <span class="delete-proj" onclick="deleteProject(event, ${p.id})">✕</span>
+                    <h3>${p.title}</h3>
+                    <p style="font-size: 0.8rem; color: #555;">${p.desc.substring(0, 60)}...</p>
+                `;
+                card.onclick = () => openProject(p.id);
+                grid.appendChild(card);
             });
         }
 
-        function manualSave() {
-            saveAllData();
-            showToast();
+        function deleteProject(e, id) {
+            e.stopPropagation();
+            if(confirm("Delete this project?")) {
+                projects = projects.filter(p => p.id !== id);
+                save();
+                renderDashboard();
+            }
         }
 
-        function saveAllData() {
-            // Save Title
-            localStorage.setItem(APP_KEY + '_title', document.getElementById('project-title').value);
-
-            // Save Sections
-            const sections = document.querySelectorAll('.section-card');
-            sections.forEach(sec => {
-                const key = sec.getAttribute('data-key');
-                const content = sec.querySelector('.smart-input').value;
-                localStorage.setItem(APP_KEY + '_' + key, content);
-            });
-
-            calculateProgress();
+        // --- PROJECT LOGIC ---
+        function openProject(id) {
+            activeProjectId = id;
+            const project = projects.find(p => p.id === id);
+            
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-project').style.display = 'block';
+            document.getElementById('hamburger').classList.remove('hidden');
+            
+            document.getElementById('display-title').innerText = project.title;
+            document.getElementById('display-desc').innerText = project.desc;
+            
+            renderSections(project);
+            renderSidebarLinks();
+            updateProgress();
         }
 
-        // 2. Event Listeners
-        function attachListeners() {
-            // Auto-render on input
-            const inputs = document.querySelectorAll('.smart-input');
-            inputs.forEach(input => {
-                input.addEventListener('input', (e) => {
-                    // Render live
-                    const val = e.target.value;
-                    const display = e.target.parentElement.querySelector('.rendered-view');
-                    display.innerHTML = parseContent(val);
-                });
+        function renderSections(project) {
+            const container = document.getElementById('sections-container');
+            container.innerHTML = '';
 
-                // Auto-save on blur (focus lost)
-                input.addEventListener('blur', () => {
-                    saveAllData();
-                });
-            });
-
-            // Title save
-            document.getElementById('project-title').addEventListener('input', () => {
-                // Debounce simple save
-                setTimeout(() => {
-                    localStorage.setItem(APP_KEY + '_title', document.getElementById('project-title').value);
-                }, 1000);
+            SECTIONS_CONFIG.forEach((sec, index) => {
+                const savedVal = project.data[sec.id] || "";
+                const sectionHtml = `
+                    <section class="section-card" id="scroll-${sec.id}">
+                        <div class="section-header">
+                            <h3>${index + 1}. ${sec.title}</h3>
+                        </div>
+                        <div class="section-body">
+                            <div>
+                                <strong>PROMPT:</strong>
+                                <div style="background:#f9f9f9; padding:10px; border:1px solid #ccc; margin:5px 0; font-size:0.9rem;">
+                                    <span id="txt-${sec.id}">${sec.prompt}</span>
+                                    <br><button class="btn btn-outline" style="padding:4px 8px; font-size:10px; margin-top:5px;" onclick="copyText('txt-${sec.id}')">COPY PROMPT</button>
+                                </div>
+                            </div>
+                            <a href="${sec.link}" target="_blank" style="color:black; font-size:0.8rem; font-weight:bold;">RELEVANT RESOURCE LINK</a>
+                            <div class="editor-container">
+                                <textarea class="smart-input" oninput="handleInput(this, '${sec.id}')" placeholder="Enter text or JSON...">${savedVal}</textarea>
+                                <div class="rendered-view" id="render-${sec.id}">${parseContent(savedVal)}</div>
+                            </div>
+                        </div>
+                    </section>
+                `;
+                container.insertAdjacentHTML('beforeend', sectionHtml);
             });
         }
 
-        // 3. Parser Logic (Markdown + JSON)
+        function renderSidebarLinks() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.innerHTML = '';
+            SECTIONS_CONFIG.forEach(sec => {
+                navLinks.insertAdjacentHTML('beforeend', `
+                    <li><a href="#scroll-${sec.id}" onclick="toggleMenu()">${sec.title}</a></li>
+                `);
+            });
+        }
+
+        // --- EDITOR LOGIC ---
+        function handleInput(el, secId) {
+            const val = el.value;
+            const project = projects.find(p => p.id === activeProjectId);
+            project.data[secId] = val;
+            
+            document.getElementById(`render-${secId}`).innerHTML = parseContent(val);
+            save();
+            updateProgress();
+        }
+
         function parseContent(text) {
-            if (!text) return '<span style="color:#ccc">Preview...</span>';
-            const trimmed = text.trim();
-
-            // JSON Table Detection
-            if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+            if(!text) return `<span style="color:#999 italic">Empty section...</span>`;
+            
+            // JSON to Table
+            if(text.trim().startsWith('[') && text.trim().endsWith(']')) {
                 try {
-                    const data = JSON.parse(trimmed);
-                    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
-                        return jsonToTable(data);
-                    }
-                } catch (e) { /* Ignore JSON errors, treat as text */ }
+                    const data = JSON.parse(text);
+                    let html = '<table><thead><tr>';
+                    Object.keys(data[0]).forEach(k => html += `<th>${k}</th>`);
+                    html += '</tr></thead><tbody>';
+                    data.forEach(row => {
+                        html += '<tr>';
+                        Object.values(row).forEach(v => html += `<td>${v}</td>`);
+                        html += '</tr>';
+                    });
+                    return html + '</tbody></table>';
+                } catch(e) {}
             }
 
-            // Markdown
-            let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            safeText = safeText.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-            safeText = safeText.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-            safeText = safeText.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-            safeText = safeText.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
-            safeText = safeText.replace(/\*(.*?)\*/gim, '<em>$1</em>');
-            safeText = safeText.replace(/\n/gim, '<br>');
-            return safeText;
+            // Simple Markdown (Bold/Italic/Headers)
+            return text
+                .replace(/^# (.*$)/gim, '<h3>$1</h3>')
+                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
         }
 
-        function jsonToTable(data) {
-            const headers = new Set();
-            data.forEach(obj => Object.keys(obj).forEach(k => headers.add(k)));
-            const headerArray = Array.from(headers);
-
-            let html = '<table><thead><tr>';
-            headerArray.forEach(h => html += `<th>${h}</th>`);
-            html += '</tr></thead><tbody>';
-
-            data.forEach(row => {
-                html += '<tr>';
-                headerArray.forEach(key => {
-                    const val = row[key] !== undefined ? row[key] : '';
-                    html += `<td>${val}</td>`;
-                });
-                html += '</tr>';
+        function updateProgress() {
+            const project = projects.find(p => p.id === activeProjectId);
+            const total = SECTIONS_CONFIG.length;
+            let count = 0;
+            SECTIONS_CONFIG.forEach(sec => {
+                if(project.data[sec.id] && project.data[sec.id].trim().length > 0) count++;
             });
-            return html + '</tbody></table>';
+            const pct = Math.round((count/total)*100);
+            document.getElementById('main-progress').style.width = pct + '%';
+            document.getElementById('progress-text').innerText = pct + '%';
         }
 
-        // 4. Utilities
         function copyText(id) {
-            const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text).then(() => showToast("Copied!"));
+            const t = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(t);
         }
 
-        function showToast(msg = "Saved!") {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
+        function save() {
+            localStorage.setItem('SRM_PROJECTS', JSON.stringify(projects));
         }
 
-        function calculateProgress() {
-            const sections = document.querySelectorAll('.section-card');
-            let filled = 0;
-            sections.forEach(sec => {
-                const key = sec.getAttribute('data-key');
-                const val = sec.querySelector('.smart-input').value.trim();
-                const dot = document.getElementById('dot-' + key);
-                
-                if (val.length > 0) {
-                    filled++;
-                    if(dot) dot.classList.add('done');
-                } else {
-                    if(dot) dot.classList.remove('done');
-                }
-            });
-            const percent = Math.round((filled / sections.length) * 100);
-            document.getElementById('progress-bar').style.width = percent + '%';
-            document.getElementById('progress-text').innerText = percent + '%';
-        }
+        // Init
+        goDashboard();
     </script>
 </body>
 </html>
