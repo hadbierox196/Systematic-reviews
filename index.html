@@ -12,191 +12,197 @@
     <style>
         :root {
             --bg: #ffffff;
+            --surface: #ffffff;
             --text: #000000;
             --border: #000000;
             --gray: #f4f4f4;
+            --accent: #000000;
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Dark Mode Colors */
+        [data-theme="dark"] {
+            --bg: #000000;
+            --surface: #121212;
+            --text: #ffffff;
+            --border: #ffffff;
+            --gray: #1e1e1e;
+            --accent: #ffffff;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: background var(--transition), color var(--transition); }
         
         h1, h2, h3, h4 { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
 
         /* --- UI COMPONENTS --- */
         .btn {
-            background: black; color: white; border: none; padding: 12px 20px;
+            background: var(--text); color: var(--bg); border: none; padding: 12px 20px;
             font-family: 'Barlow Condensed'; font-weight: 700; cursor: pointer;
             text-transform: uppercase; transition: var(--transition);
         }
-        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
-        .btn-outline { background: transparent; color: black; border: 2px solid black; }
+        .btn:hover { opacity: 0.8; }
+        .btn-outline { background: transparent; color: var(--text); border: 2px solid var(--border); }
 
         input, textarea {
-            width: 100%; padding: 12px; border: 2px solid black;
-            font-family: 'Poppins'; outline: none;
+            width: 100%; padding: 12px; border: 2px solid var(--border);
+            font-family: 'Poppins'; outline: none; background: var(--surface); color: var(--text);
         }
 
-        /* --- DASHBOARD --- */
-        #view-dashboard { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
-        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
-        .project-card { 
-            border: 2px solid black; padding: 20px; cursor: pointer; 
-            transition: var(--transition); position: relative;
-        }
-        .project-card:hover { background: var(--gray); }
-        .delete-proj { position: absolute; top: 10px; right: 10px; color: red; cursor: pointer; font-weight: bold; }
-
-        /* --- HEADER & HAMBURGER --- */
+        /* --- HEADER --- */
         .header {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 15px 20px; border-bottom: 2px solid black; sticky: top; background: white; z-index: 1000;
+            padding: 15px 20px; border-bottom: 2px solid var(--border); 
+            position: sticky; top: 0; background: var(--bg); z-index: 1000;
         }
-        .nav-toggle { font-size: 24px; cursor: pointer; display: block; }
-        
-        /* Side Menu */
+        .nav-controls { display: flex; align-items: center; gap: 15px; }
+        .hamburger { font-size: 24px; cursor: pointer; }
+        .theme-toggle { cursor: pointer; font-size: 20px; border: none; background: none; color: var(--text); }
+
+        /* --- SIDE MENU --- */
         .side-menu {
             position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
-            background: white; border-right: 2px solid black; z-index: 2000;
+            background: var(--bg); border-right: 2px solid var(--border); z-index: 2000;
             transition: var(--transition); padding: 20px; overflow-y: auto;
         }
         .side-menu.open { left: 0; }
         .menu-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 1500; display: none;
+            background: rgba(0,0,0,0.6); z-index: 1500; display: none;
         }
         .menu-overlay.show { display: block; }
-        
         .nav-list { list-style: none; margin-top: 30px; }
-        .nav-list li { margin-bottom: 10px; }
         .nav-list a { 
-            text-decoration: none; color: black; font-family: 'Barlow Condensed';
-            font-weight: 600; font-size: 1.2rem; display: block; padding: 5px;
+            text-decoration: none; color: var(--text); font-family: 'Barlow Condensed';
+            font-weight: 600; font-size: 1.1rem; display: block; padding: 10px;
+            border-bottom: 1px solid var(--gray);
         }
-        .nav-list a:hover { background: var(--gray); }
+        .nav-list a.active { background: var(--text); color: var(--bg); }
 
-        /* --- PROJECT VIEW --- */
-        #view-project { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .section-card { border: 2px solid black; margin-bottom: 40px; scroll-margin-top: 100px; }
-        .section-header { background: black; color: white; padding: 15px; display: flex; justify-content: space-between; }
-        .section-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        /* --- VIEWS --- */
+        #view-dashboard, #view-project { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 30px; }
+        .project-card { border: 2px solid var(--border); padding: 20px; cursor: pointer; position: relative; }
+        .project-card:hover { background: var(--gray); }
 
-        /* Smart Editor */
-        .editor-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 900px) { .editor-container { grid-template-columns: 1fr 1fr; } }
-        .smart-input { min-height: 250px; font-size: 14px; }
-        .rendered-view { border: 1px solid #ddd; padding: 15px; background: white; min-height: 250px; overflow-x: auto; }
+        /* --- SINGLE SECTION VIEW --- */
+        .section-view { display: none; animation: fadeIn 0.4s ease; }
+        .section-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .editor-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
+        @media (min-width: 900px) { .editor-grid { grid-template-columns: 1fr 1fr; } }
         
-        /* Table Styles */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; font-size: 0.9rem; }
-        th { background: #eee; }
+        .rendered-view { 
+            border: 1px solid var(--border); padding: 20px; background: var(--surface); 
+            min-height: 300px; overflow-x: auto;
+        }
+        
+        /* Table Styles (Dark Mode Compatible) */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid var(--border); padding: 10px; text-align: left; }
+        th { background: var(--gray); }
 
-        /* Progress Bar */
-        .progress-bar-container { height: 8px; background: #ddd; width: 100%; margin: 10px 0; }
-        .progress-fill { height: 100%; background: black; width: 0%; transition: width 0.5s; }
+        .progress-bar { height: 6px; background: var(--gray); width: 100%; margin: 15px 0; border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--text); width: 0%; transition: width 0.5s; }
 
         .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
     <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
     <nav class="side-menu" id="sideMenu">
-        <h2 onclick="goDashboard()" style="cursor:pointer">← Dashboard</h2>
-        <ul class="nav-list" id="navLinks">
-            </ul>
+        <h2 onclick="goDashboard()" style="cursor:pointer; margin-bottom: 20px;">← Dashboard</h2>
+        <div id="project-nav-header">
+            <h4 style="opacity: 0.6;">Project Sections</h4>
+            <div class="progress-bar"><div class="progress-fill" id="side-progress"></div></div>
+        </div>
+        <ul class="nav-list" id="navLinks"></ul>
     </nav>
 
     <header class="header">
-        <div class="nav-toggle" id="hamburger" onclick="toggleMenu()">☰</div>
-        <h2 id="current-project-name">SYSTEMATIC REVIEW MANAGER</h2>
-        <button class="btn btn-outline" onclick="goDashboard()">ALL PROJECTS</button>
+        <div class="nav-controls">
+            <div class="hamburger hidden" id="hamburger" onclick="toggleMenu()">☰</div>
+            <h2 id="app-heading">SYSTEMATIC REVIEW MANAGER</h2>
+        </div>
+        <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">◑</button>
     </header>
 
     <div id="view-dashboard">
-        <h1>My Reviews</h1>
-        <p>Create and manage your systematic review projects.</p>
+        <h1>Welcome</h1>
+        <p>Create a new systematic review to begin.</p>
         
-        <div style="border: 2px solid black; padding: 20px; margin-top: 20px;">
+        <div style="border: 2px solid var(--border); padding: 25px; margin: 30px 0; background: var(--surface);">
             <h3>Start New Project</h3>
-            <input type="text" id="new-title" placeholder="Review Title..." style="margin: 10px 0;">
-            <textarea id="new-desc" placeholder="Brief description..." style="margin-bottom: 10px; height: 80px;"></textarea>
+            <input type="text" id="new-title" placeholder="Project Title (e.g., Efficacy of HIIT in Diabetes)..." style="margin: 15px 0;">
+            <textarea id="new-desc" placeholder="Brief project description or research question..." style="margin-bottom: 15px; height: 100px;"></textarea>
             <button class="btn" onclick="createNewProject()">CREATE PROJECT</button>
         </div>
 
-        <div class="project-grid" id="projectGrid">
-            </div>
+        <h2 style="margin-top: 40px;">Your Projects</h2>
+        <div class="project-grid" id="projectGrid"></div>
     </div>
 
-    <div id="view-project">
-        <div id="project-meta">
-            <h1 id="display-title">Project Title</h1>
-            <p id="display-desc">Description goes here...</p>
-            <div class="progress-bar-container">
-                <div class="progress-fill" id="main-progress"></div>
+    <div id="view-project" class="hidden">
+        <div id="section-container">
             </div>
-            <p style="font-size: 0.8rem; font-weight: bold;">TOTAL COMPLETION: <span id="progress-text">0%</span></p>
-        </div>
-        <hr style="margin: 30px 0; border: 1px solid black;">
         
-        <div id="sections-container">
-            </div>
+        <div style="margin-top: 40px; border-top: 1px solid var(--gray); padding-top: 20px; display: flex; justify-content: space-between;">
+            <button class="btn btn-outline" id="prevBtn" onclick="navigateSection(-1)">← Previous</button>
+            <button class="btn btn-outline" id="nextBtn" onclick="navigateSection(1)">Next →</button>
+        </div>
     </div>
 
     <script>
-        // --- DATA STRUCTURE ---
-        const SECTIONS_CONFIG = [
-            { id: "pico", title: "PICO", prompt: "Define Population, Intervention, Comparison, Outcome.", link: "https://example.com/pico" },
-            { id: "feasibility", title: "Preliminary Feasibility Check", prompt: "Initial search findings and study volume notes.", link: "#" },
-            { id: "protocol", title: "PROTOCOL", prompt: "Draft your PROSPERO or internal protocol.", link: "#" },
-            { id: "search", title: "Search", prompt: "Input search strings and databases used.", link: "#" },
-            { id: "abs-screen", title: "Titles/Abstract Screening", prompt: "Record inclusion/exclusion at abstract level.", link: "#" },
-            { id: "full-screen", title: "Full Text Screening", prompt: "Record reasons for full-text exclusion.", link: "#" },
-            { id: "prisma", title: "PRISMA", prompt: "Flowchart data counts.", link: "#" },
-            { id: "data-ext", title: "Data Extraction", prompt: "Use JSON format here for table rendering.", link: "#" },
-            { id: "missing", title: "Missing Data", prompt: "Contact logs for missing information.", link: "#" },
-            { id: "abstract", title: "Abstract", prompt: "Draft final manuscript abstract.", link: "#" },
-            { id: "title-page", title: "Title Page", prompt: "Author details and affiliations.", link: "#" },
-            { id: "intro", title: "Introduction", prompt: "Rationale and objectives.", link: "#" },
-            { id: "methods", title: "Methods", prompt: "Detailed methodology description.", link: "#" },
-            { id: "results", title: "Results", prompt: "Findings and statistical data.", link: "#" },
+        const SECTIONS = [
+            { id: "pico", title: "PICO", prompt: "Outline PICO criteria.", link: "#" },
+            { id: "feasibility", title: "Feasibility Check", prompt: "Initial volume of evidence notes.", link: "#" },
+            { id: "protocol", title: "Protocol", prompt: "Draft methodology and registration info.", link: "#" },
+            { id: "search", title: "Search Strategy", prompt: "Keywords and database strings.", link: "#" },
+            { id: "abs-screen", title: "Abstract Screening", prompt: "Initial screening logs.", link: "#" },
+            { id: "full-screen", title: "Full Text Screening", prompt: "Exclusion rationale.", link: "#" },
+            { id: "prisma", title: "PRISMA Flow", prompt: "Identification and exclusion counts.", link: "#" },
+            { id: "extraction", title: "Data Extraction", prompt: "Paste JSON array for table extraction.", link: "#" },
+            { id: "missing", title: "Missing Data", prompt: "Author communication logs.", link: "#" },
+            { id: "abstract", title: "Final Abstract", prompt: "Structured summary.", link: "#" },
+            { id: "titlepage", title: "Title Page", prompt: "Authors and affiliations.", link: "#" },
+            { id: "intro", title: "Introduction", prompt: "Gap analysis and objective.", link: "#" },
+            { id: "methods", title: "Methods", prompt: "Statistical and review methods.", link: "#" },
+            { id: "results", title: "Results", prompt: "Narrative synthesis or meta-analysis.", link: "#" },
             { id: "discussion", title: "Discussion", prompt: "Limitations and conclusions.", link: "#" }
         ];
 
-        let projects = JSON.parse(localStorage.getItem('SRM_PROJECTS')) || [];
+        let projects = JSON.parse(localStorage.getItem('SRM_DATA_V4')) || [];
         let activeProjectId = null;
+        let currentSectionIdx = 0;
 
-        // --- NAVIGATION ---
-        function toggleMenu() {
-            document.getElementById('sideMenu').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('show');
+        // --- THEME ---
+        function toggleTheme() {
+            const body = document.body;
+            const newTheme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('SRM_THEME', newTheme);
         }
 
+        // --- DASHBOARD ---
         function goDashboard() {
             activeProjectId = null;
             document.getElementById('view-dashboard').classList.remove('hidden');
-            document.getElementById('view-project').style.display = 'none';
-            document.getElementById('sideMenu').classList.remove('open');
-            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('view-project').classList.add('hidden');
             document.getElementById('hamburger').classList.add('hidden');
+            document.getElementById('app-heading').innerText = "SYSTEMATIC REVIEW MANAGER";
+            toggleMenu(false);
             renderDashboard();
         }
 
-        // --- DASHBOARD LOGIC ---
         function createNewProject() {
-            const title = document.getElementById('new-title').value;
-            const desc = document.getElementById('new-desc').value;
-            if(!title) return alert("Please enter a title");
-
-            const newProj = {
-                id: Date.now(),
-                title: title,
-                desc: desc,
-                data: {} // Stores content for the 15 sections
-            };
-
-            projects.push(newProj);
+            const title = document.getElementById('new-title').value.trim();
+            const desc = document.getElementById('new-desc').value.trim();
+            if(!title) return alert("Title required");
+            
+            const newProject = { id: Date.now(), title, desc, data: {} };
+            projects.push(newProject);
             save();
             document.getElementById('new-title').value = '';
             document.getElementById('new-desc').value = '';
@@ -205,148 +211,132 @@
 
         function renderDashboard() {
             const grid = document.getElementById('projectGrid');
-            grid.innerHTML = '';
+            grid.innerHTML = projects.length ? '' : '<p>No projects found.</p>';
             projects.forEach(p => {
                 const card = document.createElement('div');
                 card.className = 'project-card';
-                card.innerHTML = `
-                    <span class="delete-proj" onclick="deleteProject(event, ${p.id})">✕</span>
-                    <h3>${p.title}</h3>
-                    <p style="font-size: 0.8rem; color: #555;">${p.desc.substring(0, 60)}...</p>
-                `;
+                card.innerHTML = `<h3>${p.title}</h3><p style="font-size: 0.8rem; opacity: 0.7;">${p.desc}</p>`;
                 card.onclick = () => openProject(p.id);
                 grid.appendChild(card);
             });
         }
 
-        function deleteProject(e, id) {
-            e.stopPropagation();
-            if(confirm("Delete this project?")) {
-                projects = projects.filter(p => p.id !== id);
-                save();
-                renderDashboard();
-            }
-        }
-
-        // --- PROJECT LOGIC ---
+        // --- NAVIGATION & VIEWS ---
         function openProject(id) {
             activeProjectId = id;
-            const project = projects.find(p => p.id === id);
+            currentSectionIdx = 0;
+            const p = projects.find(x => x.id === id);
             
             document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-project').style.display = 'block';
+            document.getElementById('view-project').classList.remove('hidden');
             document.getElementById('hamburger').classList.remove('hidden');
+            document.getElementById('app-heading').innerText = p.title;
+
+            renderSidebar();
+            showSection(0);
+        }
+
+        function showSection(idx) {
+            currentSectionIdx = idx;
+            const sec = SECTIONS[idx];
+            const project = projects.find(p => p.id === activeProjectId);
+            const savedData = project.data[sec.id] || "";
+
+            const container = document.getElementById('section-container');
+            container.innerHTML = `
+                <div class="section-view active">
+                    <h1>${sec.title}</h1>
+                    <div style="background: var(--gray); padding: 15px; margin: 20px 0; border-left: 4px solid var(--text);">
+                        <p style="font-size: 0.9rem;"><strong>PROMPT:</strong> ${sec.prompt}</p>
+                        <a href="${sec.link}" target="_blank" style="color: var(--text); font-size: 0.8rem; font-weight: bold;">[RESOURCE LINK]</a>
+                    </div>
+                    <div class="editor-grid">
+                        <textarea id="edit-${sec.id}" oninput="updateData('${sec.id}', this.value)" placeholder="Type here...">${savedData}</textarea>
+                        <div class="rendered-view" id="render-${sec.id}">${parse(savedData)}</div>
+                    </div>
+                </div>
+            `;
             
-            document.getElementById('display-title').innerText = project.title;
-            document.getElementById('display-desc').innerText = project.desc;
-            
-            renderSections(project);
-            renderSidebarLinks();
+            updateNavUI();
             updateProgress();
         }
 
-        function renderSections(project) {
-            const container = document.getElementById('sections-container');
-            container.innerHTML = '';
+        function navigateSection(dir) {
+            let next = currentSectionIdx + dir;
+            if (next >= 0 && next < SECTIONS.length) showSection(next);
+        }
 
-            SECTIONS_CONFIG.forEach((sec, index) => {
-                const savedVal = project.data[sec.id] || "";
-                const sectionHtml = `
-                    <section class="section-card" id="scroll-${sec.id}">
-                        <div class="section-header">
-                            <h3>${index + 1}. ${sec.title}</h3>
-                        </div>
-                        <div class="section-body">
-                            <div>
-                                <strong>PROMPT:</strong>
-                                <div style="background:#f9f9f9; padding:10px; border:1px solid #ccc; margin:5px 0; font-size:0.9rem;">
-                                    <span id="txt-${sec.id}">${sec.prompt}</span>
-                                    <br><button class="btn btn-outline" style="padding:4px 8px; font-size:10px; margin-top:5px;" onclick="copyText('txt-${sec.id}')">COPY PROMPT</button>
-                                </div>
-                            </div>
-                            <a href="${sec.link}" target="_blank" style="color:black; font-size:0.8rem; font-weight:bold;">RELEVANT RESOURCE LINK</a>
-                            <div class="editor-container">
-                                <textarea class="smart-input" oninput="handleInput(this, '${sec.id}')" placeholder="Enter text or JSON...">${savedVal}</textarea>
-                                <div class="rendered-view" id="render-${sec.id}">${parseContent(savedVal)}</div>
-                            </div>
-                        </div>
-                    </section>
-                `;
-                container.insertAdjacentHTML('beforeend', sectionHtml);
+        function updateNavUI() {
+            // Update sidebar active state
+            document.querySelectorAll('.nav-list a').forEach((a, i) => {
+                a.classList.toggle('active', i === currentSectionIdx);
+            });
+            // Update Prev/Next buttons
+            document.getElementById('prevBtn').disabled = currentSectionIdx === 0;
+            document.getElementById('nextBtn').disabled = currentSectionIdx === SECTIONS.length - 1;
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('navLinks');
+            list.innerHTML = '';
+            SECTIONS.forEach((s, i) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#" onclick="showSection(${i}); toggleMenu(); return false;">${s.title}</a>`;
+                list.appendChild(li);
             });
         }
 
-        function renderSidebarLinks() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.innerHTML = '';
-            SECTIONS_CONFIG.forEach(sec => {
-                navLinks.insertAdjacentHTML('beforeend', `
-                    <li><a href="#scroll-${sec.id}" onclick="toggleMenu()">${sec.title}</a></li>
-                `);
-            });
+        function toggleMenu(force) {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('overlay');
+            if(force === false) {
+                menu.classList.remove('open');
+                overlay.classList.remove('show');
+            } else {
+                menu.classList.toggle('open');
+                overlay.classList.toggle('show');
+            }
         }
 
-        // --- EDITOR LOGIC ---
-        function handleInput(el, secId) {
-            const val = el.value;
-            const project = projects.find(p => p.id === activeProjectId);
-            project.data[secId] = val;
-            
-            document.getElementById(`render-${secId}`).innerHTML = parseContent(val);
+        // --- CORE LOGIC ---
+        function updateData(secId, val) {
+            const p = projects.find(x => x.id === activeProjectId);
+            p.data[secId] = val;
+            document.getElementById(`render-${secId}`).innerHTML = parse(val);
             save();
             updateProgress();
         }
 
-        function parseContent(text) {
-            if(!text) return `<span style="color:#999 italic">Empty section...</span>`;
-            
-            // JSON to Table
+        function parse(text) {
+            if(!text) return '<span style="opacity: 0.4;">Preview...</span>';
+            // JSON Detect
             if(text.trim().startsWith('[') && text.trim().endsWith(']')) {
                 try {
-                    const data = JSON.parse(text);
-                    let html = '<table><thead><tr>';
-                    Object.keys(data[0]).forEach(k => html += `<th>${k}</th>`);
-                    html += '</tr></thead><tbody>';
-                    data.forEach(row => {
-                        html += '<tr>';
-                        Object.values(row).forEach(v => html += `<td>${v}</td>`);
-                        html += '</tr>';
-                    });
-                    return html + '</tbody></table>';
+                    const d = JSON.parse(text);
+                    let h = '<table><thead><tr>' + Object.keys(d[0]).map(k => `<th>${k}</th>`).join('') + '</tr></thead><tbody>';
+                    d.forEach(r => h += '<tr>' + Object.values(r).map(v => `<td>${v}</td>`).join('') + '</tr>');
+                    return h + '</tbody></table>';
                 } catch(e) {}
             }
-
-            // Simple Markdown (Bold/Italic/Headers)
-            return text
-                .replace(/^# (.*$)/gim, '<h3>$1</h3>')
-                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-                .replace(/\n/g, '<br>');
+            // Simple Markdown
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n/g, '<br>');
         }
 
         function updateProgress() {
-            const project = projects.find(p => p.id === activeProjectId);
-            const total = SECTIONS_CONFIG.length;
-            let count = 0;
-            SECTIONS_CONFIG.forEach(sec => {
-                if(project.data[sec.id] && project.data[sec.id].trim().length > 0) count++;
-            });
-            const pct = Math.round((count/total)*100);
-            document.getElementById('main-progress').style.width = pct + '%';
-            document.getElementById('progress-text').innerText = pct + '%';
+            const p = projects.find(x => x.id === activeProjectId);
+            const filled = SECTIONS.filter(s => p.data[s.id] && p.data[s.id].trim()).length;
+            const pct = (filled / SECTIONS.length) * 100;
+            document.getElementById('side-progress').style.width = pct + '%';
         }
 
-        function copyText(id) {
-            const t = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(t);
-        }
+        function save() { localStorage.setItem('SRM_DATA_V4', JSON.stringify(projects)); }
 
-        function save() {
-            localStorage.setItem('SRM_PROJECTS', JSON.stringify(projects));
-        }
-
-        // Init
-        goDashboard();
+        // --- INIT ---
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('SRM_THEME');
+            if(savedTheme) document.body.setAttribute('data-theme', savedTheme);
+            goDashboard();
+        };
     </script>
 </body>
 </html>
