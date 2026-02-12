@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systematic Review Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f0f2f5; --white: #ffffff; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        
+        /* Sticky Header */
+        nav { 
+            position: sticky; top: 0; background: var(--primary); color: white; 
+            padding: 15px; z-index: 1000; display: flex; flex-direction: column; gap: 10px;
+        }
+        .nav-top { display: flex; justify-content: space-between; align-items: center; }
+        
+        .project-header { background: #1a252f; padding: 15px; border-bottom: 4px solid var(--accent); }
+        .project-header input { 
+            width: 100%; background: transparent; border: none; border-bottom: 2px solid #fff;
+            color: white; font-family: 'Barlow Condensed'; font-size: 1.5rem; outline: none;
+        }
+
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+
+        .section-card { 
+            background: var(--white); border-radius: 12px; padding: 25px; 
+            margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        
+        h2 { font-family: 'Barlow Condensed'; font-size: 2rem; color: var(--primary); margin-top: 0; border-bottom: 2px solid #eee; }
+
+        /* Input Styles */
+        .module { margin-bottom: 20px; }
+        label { font-family: 'Barlow Condensed'; font-weight: bold; display: block; margin-bottom: 5px; color: var(--accent); }
+        
+        textarea { 
+            width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ddd; 
+            border-radius: 6px; font-family: 'Poppins'; font-size: 0.9rem;
+        }
+
+        .prompt-area { background: #fff9db; border-color: #fab005; }
+        .web-area { background: #e3f2fd; border-color: #90caf9; min-height: 60px; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { 
+            flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; 
+            font-family: 'Barlow Condensed'; font-weight: bold; text-transform: uppercase;
+        }
+        .btn-save { background: #27ae60; color: white; }
+        .btn-copy { background: var(--primary); color: white; }
+
+        .output-view { 
+            margin-top: 20px; padding: 15px; background: #fafafa; border: 1px dashed #ccc; 
+            overflow-x: auto; min-height: 50px;
+        }
+
+        /* Formatting */
+        .heading-md { font-family: 'Barlow Condensed'; font-size: 1.4rem; color: var(--primary); font-weight: 700; display: block; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f8f9fa; font-family: 'Barlow Condensed'; }
+
+        @media (max-width: 600px) {
+            h2 { font-size: 1.5rem; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="project-header">
+    <div class="container">
+        <label style="color: #999;">SYSTEMATIC REVIEW TITLE</label>
+        <input type="text" id="projectTitle" placeholder="Enter Project Title..." oninput="saveProjectTitle()">
+    </div>
+</div>
+
+<nav>
+    <div class="container nav-top">
+        <span style="font-family: 'Barlow Condensed'; font-size: 1.2rem;">WORK PROGRESS</span>
+        <select id="jumpMenu" onchange="location.hash = this.value;" style="padding: 5px; border-radius: 4px;">
+            <option value="">Jump to Section...</option>
+        </select>
+    </div>
+</nav>
+
+<div class="container" id="mainWorkspace"></div>
+
+<script>
+    const sections = [
+        "PICO", "Preliminary Feasibility Check", "PROTOCOL", "Search", 
+        "Titles/Abstract Screening", "Full Text Screening", "PRISMA", 
+        "Data Extraction", "Missing Data", "Abstract", "Title Page", 
+        "Introduction", "Methods", "Results", "Discussion"
+    ];
+
+    const workspace = document.getElementById('mainWorkspace');
+    const jumpMenu = document.getElementById('jumpMenu');
+
+    // Initialize UI
+    sections.forEach((name, i) => {
+        const id = i + 1;
+        
+        // Populate Jump Menu
+        const opt = document.createElement('option');
+        opt.value = `section-${id}`;
+        opt.textContent = `${id}. ${name}`;
+        jumpMenu.appendChild(opt);
+
+        // Build HTML
+        workspace.innerHTML += `
+            <div class="section-card" id="section-${id}">
+                <h2>${id}. ${name}</h2>
+                
+                <div class="module">
+                    <label>Unique Section Prompt (Copyable)</label>
+                    <textarea id="prompt-${id}" class="prompt-area" placeholder="Enter specific AI prompt for this section..."></textarea>
+                    <button class="btn-copy" onclick="copyText(${id})">Copy Prompt</button>
+                </div>
+
+                <div class="module">
+                    <label>Section Websites / Apps</label>
+                    <textarea id="web-${id}" class="web-area" placeholder="List relevant URLs or tools here..."></textarea>
+                </div>
+
+                <div class="module">
+                    <label>Upload Reference</label>
+                    <input type="file" id="file-${id}" onchange="saveFileData(${id})" style="width:100%">
+                    <div id="file-status-${id}" style="font-size:0.8rem; margin-top:5px; color:#666;"></div>
+                </div>
+
+                <div class="module">
+                    <label>Data Input (Supports **Headings** & JSON Tables)</label>
+                    <textarea id="input-${id}" style="min-height:200px;" placeholder="Paste text or JSON array here..."></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-save" onclick="saveAndProcess(${id})">Save & Format Section</button>
+                </div>
+
+                <div class="output-view" id="output-${id}">
+                    <em style="color:#999;">No saved data to display.</em>
+                </div>
+            </div>
+        `;
+    });
+
+    // --- LOGIC & STORAGE ---
+
+    function saveProjectTitle() {
+        localStorage.setItem('sr_project_title', document.getElementById('projectTitle').value);
+    }
+
+    function saveFileData(id) {
+        const fileInput = document.getElementById(`file-${id}`);
+        if(fileInput.files[0]) {
+            const fileName = fileInput.files[0].name;
+            localStorage.setItem(`sr_file_${id}`, fileName);
+            document.getElementById(`file-status-${id}`).innerText = "Current File: " + fileName;
+        }
+    }
+
+    function copyText(id) {
+        const text = document.getElementById(`prompt-${id}`).value;
+        navigator.clipboard.writeText(text);
+        alert("Prompt copied!");
+    }
+
+    function saveAndProcess(id) {
+        const prompt = document.getElementById(`prompt-${id}`).value;
+        const web = document.getElementById(`web-${id}`).value;
+        const input = document.getElementById(`input-${id}`).value;
+
+        // Save to LocalStorage
+        const data = { prompt, web, input };
+        localStorage.setItem(`sr_section_data_${id}`, JSON.stringify(data));
+
+        renderOutput(id, input);
+        alert("Section " + id + " saved locally!");
+    }
+
+    function renderOutput(id, rawText) {
+        const display = document.getElementById(`output-${id}`);
+        
+        // JSON Table Logic
+        if (rawText.trim().startsWith('[') || rawText.trim().startsWith('{')) {
+            try {
+                const parsed = JSON.parse(rawText);
+                display.innerHTML = jsonToTable(parsed);
+                return;
+            } catch (e) { /* Not valid JSON, move to markdown */ }
+        }
+
+        // Markdown Heading Logic
+        let formatted = rawText
+            .replace(/\*\*(.*?)\*\*/g, '<span class="heading-md">$1</span>')
+            .replace(/\*(.*?)\*/g, '<span class="heading-md">$1</span>')
+            .replace(/\n/g, '<br>');
+
+        display.innerHTML = formatted || "<em>No content.</em>";
+    }
+
+    function jsonToTable(data) {
+        const arr = Array.isArray(data) ? data : [data];
+        let html = '<table><thead><tr>';
+        Object.keys(arr[0]).forEach(key => html += `<th>${key}</th>`);
+        html += '</tr></thead><tbody>';
+        arr.forEach(row => {
+            html += '<tr>';
+            Object.values(row).forEach(val => html += `<td>${val}</td>`);
+            html += '</tr>';
+        });
+        return html + '</tbody></table>';
+    }
+
+    // Load Data on Startup
+    window.onload = () => {
+        document.getElementById('projectTitle').value = localStorage.getItem('sr_project_title') || "";
+        
+        sections.forEach((_, i) => {
+            const id = i + 1;
+            const saved = localStorage.getItem(`sr_section_data_${id}`);
+            const savedFile = localStorage.getItem(`sr_file_${id}`);
+
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                document.getElementById(`prompt-${id}`).value = parsed.prompt || "";
+                document.getElementById(`web-${id}`).value = parsed.web || "";
+                document.getElementById(`input-${id}`).value = parsed.input || "";
+                renderOutput(id, parsed.input);
+            }
+
+            if (savedFile) {
+                document.getElementById(`file-status-${id}`).innerText = "Last uploaded: " + savedFile;
+            }
+        });
+    };
+</script>
+
+</body>
+</html>
