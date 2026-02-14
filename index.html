@@ -156,259 +156,21 @@
 
     <script>
         const SECTIONS = [
-            { id: "pico", title: "PICO", prompt: "Outline PICO criteria.", link: "#" },
-            { id: "feasibility", title: "Feasibility Check", prompt: "Initial volume of evidence notes.", link: "#" },
-            { id: "protocol", title: "Protocol", prompt: "You are an expert systematic review methodologist specializing in PROSPERO protocol development. Generate a complete, publication-ready PROSPERO protocol document based on the PICO framework I provide.
-
-**MY PICO FRAMEWORK:**
-
-Population: [INSERT]
-Intervention: [INSERT]
-Comparator: [INSERT]
-Outcomes: [INSERT]
-Study Design: [INSERT]
-
-**ADDITIONAL INFORMATION:**
-- Review title: [INSERT or "Generate suggestions"]
-- Target completion date: [INSERT]
-- Team members: [INSERT or "Me + 1 second reviewer + 1 statistician"]
-- Funding: [INSERT or "None"]
-- Specialty area: [INSERT, e.g., cardiology, oncology, neurology]
-
----
-
-**TASK:** Generate a complete PROSPERO protocol document with ALL sections below. Use professional academic language suitable for direct submission to PROSPERO.
-
----
-
-**SECTION 1: REVIEW IDENTIFIERS**
-
-1. Review title (provide 2 alternatives: one concise, one descriptive)
-2. Short title/running head (50 characters max)
-3. Named contact information template
-4. Review team members and roles template
-5. Funding sources statement
-6. Conflicts of interest statement
-
----
-
-**SECTION 2: REVIEW QUESTION & OBJECTIVES**
-
-7. Primary research question (structured format)
-8. Primary objective (clear, focused statement)
-9. Secondary objectives (3-5 specific objectives)
-10. PICO table (formatted for PROSPERO)
-
----
-
-**SECTION 3: SEARCHES**
-
-11. Information sources (complete list of databases)
-12. Search strategy description (narrative overview)
-13. Date range justification
-14. Language restrictions (with justification)
-15. Grey literature sources (specific conferences, registries, etc.)
-16. Hand-searching strategy
-17. Search update plans
-
----
-
-**SECTION 4: ELIGIBILITY CRITERIA**
-
-18. Types of studies (detailed inclusion criteria)
-19. Types of participants (detailed with diagnostic criteria)
-20. Types of interventions (comprehensive specification)
-21. Types of comparators (all eligible controls)
-22. Timing (treatment duration, follow-up requirements)
-23. Setting (all eligible contexts)
-24. Exclusion criteria (comprehensive list with rationale)
-
----
-
-**SECTION 5: OUTCOMES**
-
-25. Primary outcome
-    - Name and definition
-    - Measurement instrument/method
-    - Metric (e.g., mean change, rate, proportion)
-    - Timepoints of interest
-    - Minimal clinically important difference (if known)
-
-26. Secondary outcomes (list 5-8 outcomes)
-    - Clinical outcomes (with instruments)
-    - Biomarker/mechanistic outcomes
-    - Safety outcomes
-    - Quality of life outcomes
-    - Health economics outcomes (if applicable)
-
-For each outcome provide:
-- Clear definition
-- Measurement method
-- Timepoints
-- How data will be analyzed
-
----
-
-**SECTION 6: DATA EXTRACTION**
-
-27. Study selection process (detailed workflow)
-28. Data extraction process (who, how, software)
-29. Data items to be extracted (comprehensive list organized by category):
-    - Study characteristics
-    - Population characteristics
-    - Intervention details
-    - Comparator details
-    - Outcome data
-    - Risk of bias elements
-    - Other relevant items
-
-30. Missing data handling strategy
-31. Data checking procedures
-
----
-
-**SECTION 7: RISK OF BIAS ASSESSMENT**
-
-32. Tool selection (RoB 2.0 for RCTs, ROBINS-I for non-randomized, etc.)
-33. Domains to be assessed (list all)
-34. Process (independent dual assessment, conflict resolution)
-35. How risk of bias will inform synthesis
-
----
-
-**SECTION 8: DATA SYNTHESIS**
-
-36. Criteria for meta-analysis (when quantitative synthesis is appropriate)
-37. Effect measures (SMD, MD, RR, OR, HR as applicable)
-38. Synthesis methods:
-    - Statistical model (random-effects, fixed-effect)
-    - Heterogeneity assessment (I², tau², Q-test, prediction intervals)
-    - Software to be used
-
-39. Dealing with multi-arm trials
-40. Dealing with cluster-randomized trials (if applicable)
-41. Unit of analysis issues
-
----
-
-**SECTION 9: SUBGROUP & SENSITIVITY ANALYSES**
-
-42. Pre-specified subgroup analyses (list 5-8 with rationale):
-    - Clinical subgroups
-    - Methodological subgroups
-    - Intervention characteristic subgroups
-
-43. Pre-specified sensitivity analyses (list 5-8):
-    - Risk of bias exclusions
-    - Statistical model variations
-    - Imputed data exclusions
-    - Study design exclusions
-    - Other relevant sensitivity analyses
-
-44. Statistical tests for subgroup differences
-
----
-
-**SECTION 10: META-BIASES**
-
-45. Publication bias assessment:
-    - Funnel plots (with interpretation caveats for small N)
-    - Egger's test (threshold for application)
-    - Trim-and-fill analysis
-    
-46. Selective outcome reporting assessment
-47. Language bias considerations
-48. Citation bias considerations
-
----
-
-**SECTION 11: CERTAINTY OF EVIDENCE**
-
-49. GRADE assessment approach
-50. Domains to be evaluated:
-    - Risk of bias
-    - Inconsistency
-    - Indirectness
-    - Imprecision
-    - Publication bias
-    - Large effect
-    - Dose-response
-    - Plausible confounding
-    
-51. Summary of Findings table structure
-
----
-
-**SECTION 12: ETHICS & DISSEMINATION**
-
-52. Ethical approval requirements (typically not needed for SR)
-53. Protocol amendments procedure
-54. Dissemination plans:
-    - Target journals (list 3 in priority order)
-    - Conference presentations
-    - Data sharing policy
-
----
-
-**SECTION 13: TIMELINE**
-
-55. Projected timeline (week-by-week breakdown):
-    - Protocol finalization: Week X
-    - Search execution: Weeks X-X
-    - Screening: Weeks X-X
-    - Data extraction: Weeks X-X
-    - Risk of bias: Weeks X-X
-    - Analysis: Weeks X-X
-    - Manuscript: Weeks X-X
-    - Submission: Week X
-
----
-
-**SECTION 14: KEYWORDS**
-
-56. Generate 8-10 relevant keywords (MeSH terms and free-text)
-
----
-
-**SECTION 15: REFERENCES**
-
-57. Key methodological references (formatted):
-    - PRISMA 2020
-    - Cochrane Handbook
-    - RoB 2.0 tool
-    - GRADE
-    - Statistical methods papers
-
----
-
-**FORMATTING REQUIREMENTS:**
-
-- Use clear section headers
-- Number all sections for easy reference
-- Use bullet points for lists
-- Bold key terms
-- Write in third person future tense ("We will..." not "I will...")
-- Use precise, unambiguous language
-- Avoid vague terms like "relevant studies" (specify what makes them relevant)
-- Include justifications for methodological choices
-- Maintain consistency in terminology throughout
-
-**OUTPUT STRUCTURE:**
-
-Provide the protocol in the following format:
-    ", link: "#" },
-            { id: "search", title: "Search Strategy", prompt: "Keywords and database strings.", link: "#" },
-            { id: "abs-screen", title: "Abstract Screening", prompt: "Initial screening logs.", link: "#" },
-            { id: "full-screen", title: "Full Text Screening", prompt: "Exclusion rationale.", link: "#" },
-            { id: "prisma", title: "PRISMA Flow", prompt: "Identification and exclusion counts.", link: "#" },
-            { id: "extraction", title: "Data Extraction", prompt: "Paste JSON array for table extraction.", link: "#" },
-            { id: "missing", title: "Missing Data", prompt: "Author communication logs.", link: "#" },
-            { id: "abstract", title: "Final Abstract", prompt: "Structured summary.", link: "#" },
-            { id: "titlepage", title: "Title Page", prompt: "Authors and affiliations.", link: "#" },
-            { id: "intro", title: "Introduction", prompt: "Gap analysis and objective.", link: "#" },
-            { id: "methods", title: "Methods", prompt: "Statistical and review methods.", link: "#" },
-            { id: "results", title: "Results", prompt: "Narrative synthesis or meta-analysis.", link: "#" },
-            { id: "discussion", title: "Discussion", prompt: "Limitations and conclusions.", link: "#" }
+            { id: "pico", title: "PICO", instructions: "Outline PICO criteria.", link: "#" },
+            { id: "feasibility", title: "Feasibility Check", instructions: "Initial volume of evidence notes.", link: "#" },
+            { id: "protocol", title: "Protocol", instructions: "Draft methodology and registration info.", link: "#" },
+            { id: "search", title: "Search Strategy", instructions: "Keywords and database strings.", link: "#" },
+            { id: "abs-screen", title: "Abstract Screening", instructions: "Initial screening logs.", link: "#" },
+            { id: "full-screen", title: "Full Text Screening", instructions: "Exclusion rationale.", link: "#" },
+            { id: "prisma", title: "PRISMA Flow", instructions: "Identification and exclusion counts.", link: "#" },
+            { id: "extraction", title: "Data Extraction", instructions: "Paste JSON array for table extraction.", link: "#" },
+            { id: "missing", title: "Missing Data", instructions: "Author communication logs.", link: "#" },
+            { id: "abstract", title: "Final Abstract", instructions: "Structured summary.", link: "#" },
+            { id: "titlepage", title: "Title Page", instructions: "Authors and affiliations.", link: "#" },
+            { id: "intro", title: "Introduction", instructions: "Gap analysis and objective.", link: "#" },
+            { id: "methods", title: "Methods", instructions: "Statistical and review methods.", link: "#" },
+            { id: "results", title: "Results", instructions: "Narrative synthesis or meta-analysis.", link: "#" },
+            { id: "discussion", title: "Discussion", instructions: "Limitations and conclusions.", link: "#" }
         ];
 
         let projects = JSON.parse(localStorage.getItem('SRM_DATA_V4')) || [];
@@ -485,7 +247,7 @@ Provide the protocol in the following format:
                 <div class="section-view active">
                     <h1>${sec.title}</h1>
                     <div style="background: var(--gray); padding: 15px; margin: 20px 0; border-left: 4px solid var(--text);">
-                        <p style="font-size: 0.9rem;"><strong>PROMPT:</strong> ${sec.prompt}</p>
+                        <p style="font-size: 0.9rem;"><strong>INSTRUCTIONS:</strong> ${sec.instructions}</p>
                         <a href="${sec.link}" target="_blank" style="color: var(--text); font-size: 0.8rem; font-weight: bold;">[RESOURCE LINK]</a>
                     </div>
                     <div class="editor-grid">
